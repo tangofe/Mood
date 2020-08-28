@@ -18,14 +18,22 @@ module.exports = (app, plugin, model) => {
     // Delete
     router.delete('/comment', async (req, res) => {
         const id = req.body.id;
-        const data = await Comment.deleteOne({id})
-        /**
-         * 删除所有子评论
-         */
+        const total = [
+            new Promise((resolve, reject) => {
+                Comment.deleteOne({id}, (err, doc) => doc ? resolve(doc) : reject())
+            })
+        ]
+        // 删除所有子评论
         if(!req.body.parent_id){
-            await Comment.deleteMany({parent_id:id})
+            total.push(new Promise((resolve, reject) => {
+                Comment.deleteMany({parent_id: id}, (err, doc) => doc ? resolve(doc) : reject())
+            }))
         }
-        res.send(requestResult(data))
+        Promise.all(total).then(resolve => {
+            res.send(requestResult(resolve[0]))
+        }).catch(err => {
+            res.send(requestResult())
+        })
     })
 
     // Reply
@@ -37,7 +45,7 @@ module.exports = (app, plugin, model) => {
         }, {
             new: true
         })
-
+        
         // 添加评论id
         req.body.data.id = commentCount.count;
         const result = await Comment.create(req.body.data)
@@ -45,26 +53,21 @@ module.exports = (app, plugin, model) => {
         res.send(requestResult(result))
         
         // 邮件信息
-        const articleData = await Article.findOne({id: req.body.data.topic_id})
-        
-        if(req.body.email.email_message){
-            const obj = {
+        if(req.body.email.comment){
+            const articleData = await Article.findOne({id: req.body.data.topic_id})
+            const data = {
                 title: articleData.title,
-                url: req.body.email.address + '/' + req.body.data.topic_id,
+                url: req.body.email.web_address + '/' + req.body.data.topic_id,
                 name: req.body.data.reply_name,
                 email: req.body.data.reply_email
             }
             // 发送邮件
-            email(obj, req.body.email)
+            email(3, data, req.body.email)
         }
     })
 
     // 一键已读
     router.post('/comment_read', async (req, res) => {
-        await Counter.findOneAndUpdate({
-            name: 'comment_read'
-        }, { 'count' : 0 })
-
         const comment = await Comment.updateMany({
             status: 1
         }, {

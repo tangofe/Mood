@@ -39,8 +39,8 @@ export default {
             }
 
             const data = {
-                name: this.$data.info.email_name,
-                email: this.$data.info.email,
+                name: this.$data.info.email.name,
+                email: this.$data.info.email.address,
                 content: this.content,
                 time: this.dateFormat(),
                 image: 1,
@@ -53,11 +53,10 @@ export default {
             }
             data.type = this.message.type == 1 ? 2 : 3;
 
-            const emailArr = ['email', 'email_name', 'email_message', 'email_pass', 'address', 'web_name']
-            const email = emailArr.reduce((total, item) => {
-                total[item] = this.$data.info[item]
-                return total
-            }, {})
+            // 网站和管理员的信息
+            const email = this.$data.info['email']
+            email.web_name = this.$data.info['web_name']
+            email.web_address = this.$data.info['address']
 
             this.$http.post('comment', {data, email}).then(res => {
                 if(res.data.status === 1){

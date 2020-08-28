@@ -32,8 +32,8 @@
 
         <el-pagination
             background
-            :page-size="count"
-            :pager-count="11"
+            :page-size="10"
+            :pager-count="5"
             :total="total"
             :current-page="page"
             @current-change="load"
@@ -110,7 +110,7 @@ export default {
         },
         // 新窗口打开文章
         view(id){
-            window.open(`${window.location.host}/${id}`)
+            window.open(`${window.location.origin}/${id}`)
         },
         remove(item){
             this.$confirm('删除该文章, 是否继续?', '提示', {
@@ -140,7 +140,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .article{
     height: 100%;
     display: flex;

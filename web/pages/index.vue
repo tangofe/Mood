@@ -25,9 +25,16 @@
 			<!-- menu -->
 			<div class="nav">
 				<ul class="nav-list">
-					<li v-for="(item, index) in navList" :key="index">
-						<a @click="toPage(item.url)">{{item.title}}</a>
-					</li>
+					<template v-for="(item, index) in navList">
+						<template v-if="item.url == 'subscribe'">
+							<li v-if="$store.state.data.email_subscribe" :key="index">
+								<a @click="toPage(item.url)">{{item.title}}</a>
+							</li>
+						</template>
+						<li v-else :key="index">
+							<a @click="toPage(item.url)">{{item.title}}</a>
+						</li>
+					</template>
 				</ul>
 				<div class="world">
 					<span>Everywhere in the world has a similar life.</span>
@@ -87,6 +94,10 @@ export default {
 				{
 					title: 'Envelope',
 					url: 'envelope'
+				},
+				{
+					title: 'Subscribe',
+					url: 'subscribe'
 				},
 				{
 					title: "About",
@@ -600,6 +611,9 @@ export default {
 		width: 100%;
 		height: 100%;
 		z-index: 9999;
+		display: flex;
+		justify-content: center;
+		align-items: center;	
 		background: rgba(255, 255, 255, 0.96);
 		transition: top 0.3s cubic-bezier(0.25, 0.5, 0.5, 0.9);
 		.world{
@@ -617,7 +631,7 @@ export default {
 			width: 80%;
 			display: block;
 			text-align: center;
-			margin: 260px auto 0;
+			margin-top: -120px;
 			li{
 				margin: 0 20px 20px;
 				list-style: none;
@@ -752,7 +766,6 @@ export default {
 		}
 		.nav{
 			.nav-list{
-				margin-top: 200px;
 				li{
 					// margin: 0 12px;
 					a{
